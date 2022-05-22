@@ -1,16 +1,27 @@
 <template>
 <InputForm @add-product="addProduct"></InputForm>
+
+<div class="togg">
+    <label for="sort">Sort By</label>
+    <select name="sort" id="sort" v-model="sortValue" @change="sortData">
+        <option value="none" >Please select one</option>
+        <option value="id">Id</option>
+        <option value="type">Type</option>
+        <option value="name">Name</option>
+    </select>
+    <ToggleSwitch v-if="sortValue !== 'none'" ref="idTogg" c-name="a" @sort-update="sortData"></ToggleSwitch>
+</div>
+
+<div class="filter-term">
+    <label for="s-term"></label>
+    <input id="s-term" type="text" v-model="searchTerm" placeholder="Filter contents..." @keyup="checkEmptySearch($event)"/>
+    <button type="button" @click="filterTable">Search</button>
+</div>
 <table class="center">
     <thead>
-        <th>Id
-            <ToggleSwitch ref="idTogg" c-name="a" @sort-update="sortId"></ToggleSwitch>
-        </th>
-        <th>Type
-            <ToggleSwitch ref="typeTogg" c-name="b" @sort-update="sortType"></ToggleSwitch>
-        </th>
-        <th>Name
-            <ToggleSwitch ref="nameTogg" c-name="c" @sort-update="sortName"></ToggleSwitch>
-        </th>
+        <th>Id</th>
+        <th>Type</th>
+        <th>Name</th>
         <th>Topping</th>
     </thead>
 
@@ -334,7 +345,9 @@ export default {
             filteredAndSorted: [],
             desId: false,
             desType: false,
-            desName: false
+            desName: false,
+            searchTerm: '',
+            sortValue: 'none'
         }
     },
     computed : {
@@ -344,26 +357,20 @@ export default {
             this.allValues = [...this.allValues, data];
             this.filteredAndSorted = [...this.filteredAndSorted, data];
         },
-        sortId(data) {
-            this.desId = data.target._modelValue;
-            if (this.desId === 'des') {
-                this.resetOtherToggles('id');
+        sortData(data) {
+            let val = '';
+            if (data && !data.target) {
+                val = data;
+            } else {
+                val = data && data.target ? data.target._modelValue : 'asc';
             }
-            this.reorderData(this.desId, 'id');
-        },
-        sortType(data) {
-            this.desType = data.target._modelValue;
-            if (this.desType === 'des') {
-                this.resetOtherToggles('type');
+            if (this.sortValue !== 'none') {
+                this.reorderData(val,this.sortValue);
+            } else if (this.sortValue === 'none' && this.searchTerm !== '') {
+                this.filterTable();
+            } else {
+                this.filteredAndSorted = JSON.parse(JSON.stringify(this.allValues));
             }
-            this.reorderData(this.desType, 'type');
-        },
-        sortName(data) {
-            this.desName = data.target._modelValue;
-            if (this.desName === 'des') {
-                this.resetOtherToggles('name');
-            }
-            this.reorderData(this.desName, 'name');
         },
         resetOtherToggles(activeTogg) {
             if (activeTogg === 'id') {
@@ -376,7 +383,6 @@ export default {
                 this.$refs.idTogg.resetToggle(false);
                 this.$refs.typeTogg.resetToggle(false);
             }
-            this.filteredAndSorted = JSON.parse(JSON.stringify(this.allValues));
         },
         reorderData(isDescending, column) {
             this.filteredAndSorted.sort((a,b) => {
@@ -399,6 +405,25 @@ export default {
                 }
                 return 0
             });
+        },
+        filterTable() {
+           let filteredArray = [];
+           if (this.searchTerm !== '') {
+                filteredArray =  this.filteredAndSorted.filter(item => {
+                    return item.id.toLowerCase().indexOf(this.searchTerm.toLowerCase()) !== -1 || item.type.toLowerCase().indexOf(this.searchTerm.toLowerCase()) !== -1 || item.name.toLowerCase().indexOf(this.searchTerm.toLowerCase()) !== -1 || item.topping.toLowerCase().indexOf(this.searchTerm.toLowerCase()) !== -1
+                });
+                this.filteredAndSorted = filteredArray;
+            } else {
+                this.filteredAndSorted = JSON.parse(JSON.stringify(this.allValues));
+            }
+        },
+        checkEmptySearch(event) {
+            if (event.target.value.length === 0) {
+                this.filteredAndSorted = JSON.parse(JSON.stringify(this.allValues));
+                if (this.sortValue !== 'none') {
+                    this.sortData(this.$refs.idTogg.descending);
+                }
+            }
         }
     },
     mounted() {
@@ -428,6 +453,15 @@ td {
 .flex-div{
     display: flex;
     justify-content: center;
+}
+.filter-term{
+    display: flex;
+    justify-content: center;
+}
+.togg{
+    display: flex;
+    justify-content: center;
+    padding-bottom: 10px;
 }
 
 </style>
