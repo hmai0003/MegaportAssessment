@@ -2,14 +2,20 @@
 <InputForm @add-product="addProduct"></InputForm>
 <table class="center">
     <thead>
-        <th>Id</th>
-        <th>Type</th>
-        <th>Name</th>
+        <th>Id
+            <ToggleSwitch ref="idTogg" c-name="a" @sort-update="sortId"></ToggleSwitch>
+        </th>
+        <th>Type
+            <ToggleSwitch ref="typeTogg" c-name="b" @sort-update="sortType"></ToggleSwitch>
+        </th>
+        <th>Name
+            <ToggleSwitch ref="nameTogg" c-name="c" @sort-update="sortName"></ToggleSwitch>
+        </th>
         <th>Topping</th>
     </thead>
 
     <tbody>
-      <tr v-for="(item,index) in allValues" :key="index">
+      <tr v-for="(item,index) in filteredAndSorted" :key="index">
         <td>{{ item.id }}</td>
         <td>{{ item.type }}</td>
         <td>{{ item.name }}</td>
@@ -22,10 +28,12 @@
 
 <script>
 import InputForm from './InputForm';
+import ToggleSwitch from './UI/ToggleSwitch.vue';
 
 export default {
     components: { 
-        InputForm
+        InputForm,
+        ToggleSwitch
     },
 
     props: {
@@ -322,7 +330,11 @@ export default {
                 "name": "Filled",
                 "topping": "Regular Maple"
                 }
-            ]
+            ],
+            filteredAndSorted: [],
+            desId: false,
+            desType: false,
+            desName: false
         }
     },
     computed : {
@@ -330,7 +342,67 @@ export default {
     methods: {
         addProduct(data) {
             this.allValues = [...this.allValues, data];
+            this.filteredAndSorted = [...this.filteredAndSorted, data];
+        },
+        sortId(data) {
+            this.desId = data.target._modelValue;
+            if (this.desId === 'des') {
+                this.resetOtherToggles('id');
+            }
+            this.reorderData(this.desId, 'id');
+        },
+        sortType(data) {
+            this.desType = data.target._modelValue;
+            if (this.desType === 'des') {
+                this.resetOtherToggles('type');
+            }
+            this.reorderData(this.desType, 'type');
+        },
+        sortName(data) {
+            this.desName = data.target._modelValue;
+            if (this.desName === 'des') {
+                this.resetOtherToggles('name');
+            }
+            this.reorderData(this.desName, 'name');
+        },
+        resetOtherToggles(activeTogg) {
+            if (activeTogg === 'id') {
+                this.$refs.typeTogg.resetToggle(false);
+                this.$refs.nameTogg.resetToggle(false);
+            } else if (activeTogg === 'type') {
+                this.$refs.idTogg.resetToggle(false);
+                this.$refs.nameTogg.resetToggle(false);
+            } else {
+                this.$refs.idTogg.resetToggle(false);
+                this.$refs.typeTogg.resetToggle(false);
+            }
+            this.filteredAndSorted = JSON.parse(JSON.stringify(this.allValues));
+        },
+        reorderData(isDescending, column) {
+            this.filteredAndSorted.sort((a,b) => {
+                let fa = a[column].toLowerCase(),
+                    fb = b[column].toLowerCase();
+                if (isDescending === "des") {
+                    if (fa < fb) {
+                        return 1
+                    }
+                    if (fa > fb) {
+                        return -1
+                    }
+                } else {
+                    if (fa < fb) {
+                        return -1
+                    }
+                    if (fa > fb) {
+                        return 1
+                    }
+                }
+                return 0
+            });
         }
+    },
+    mounted() {
+        this.filteredAndSorted = JSON.parse(JSON.stringify(this.allValues));
     }
 }
 </script>
@@ -352,6 +424,10 @@ td {
   text-align: center;
   border: 1px solid black;
   padding: 5px;
+}
+.flex-div{
+    display: flex;
+    justify-content: center;
 }
 
 </style>
