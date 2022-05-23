@@ -1,22 +1,28 @@
 <template>
 <InputForm @add-product="addProduct"></InputForm>
 
-<div class="togg">
-    <label for="sort">Sort By</label>
-    <select name="sort" id="sort" v-model="sortValue" @change="sortData">
-        <option value="none" >Please select one</option>
-        <option value="id">Id</option>
-        <option value="type">Type</option>
-        <option value="name">Name</option>
-    </select>
-    <ToggleSwitch v-if="sortValue !== 'none'" ref="idTogg" c-name="a" @sort-update="sortData"></ToggleSwitch>
+<CardComp style=" width: 41%;margin: 0 auto;">
+    <h3 class="heading">Filter and Sort</h3>
+    <div class="filters">
+    <div class="togg">
+        <label for="sort">Sort By</label>
+        <select name="sort" id="sort" v-model="sortValue" @change="sortData">
+            <option value="none" >Please select one</option>
+            <option value="id">Id</option>
+            <option value="type">Type</option>
+            <option value="name">Name</option>
+        </select>
+        <div class="togg-div">
+            <ToggleSwitch v-if="sortValue !== 'none'" ref="idTogg" c-name="a" @sort-update="sortData"></ToggleSwitch>
+        </div>
+    </div>
+    <div class="filter-term">
+        <label for="s-term"></label>
+        <input id="s-term" type="text" v-model="searchTerm" placeholder="Filter contents..." @keyup="checkEmptySearch($event)" style="height: 38.4px;"/>
+        <ButtonComp button-type="info" @click="filterTable" style="height:38.4px;">Search</ButtonComp>
+    </div>
 </div>
-
-<div class="filter-term">
-    <label for="s-term"></label>
-    <input id="s-term" type="text" v-model="searchTerm" placeholder="Filter contents..." @keyup="checkEmptySearch($event)"/>
-    <button type="button" @click="filterTable">Search</button>
-</div>
+</CardComp>
 <table class="center">
     <thead>
         <th>Id</th>
@@ -40,11 +46,15 @@
 <script>
 import InputForm from './InputForm';
 import ToggleSwitch from './UI/ToggleSwitch.vue';
+import ButtonComp from './UI/ButtonComponent.vue';
+import CardComp from './UI/CardComp.vue'
 
 export default {
     components: { 
         InputForm,
-        ToggleSwitch
+        ToggleSwitch,
+        ButtonComp,
+        CardComp
     },
 
     props: {
@@ -372,18 +382,6 @@ export default {
                 this.filteredAndSorted = JSON.parse(JSON.stringify(this.allValues));
             }
         },
-        resetOtherToggles(activeTogg) {
-            if (activeTogg === 'id') {
-                this.$refs.typeTogg.resetToggle(false);
-                this.$refs.nameTogg.resetToggle(false);
-            } else if (activeTogg === 'type') {
-                this.$refs.idTogg.resetToggle(false);
-                this.$refs.nameTogg.resetToggle(false);
-            } else {
-                this.$refs.idTogg.resetToggle(false);
-                this.$refs.typeTogg.resetToggle(false);
-            }
-        },
         reorderData(isDescending, column) {
             this.filteredAndSorted.sort((a,b) => {
                 let fa = a[column].toLowerCase(),
@@ -428,11 +426,35 @@ export default {
     },
     mounted() {
         this.filteredAndSorted = JSON.parse(JSON.stringify(this.allValues));
+    },
+    watch: {
+        sortValue () {
+            if (this.$refs.idTogg) {
+                this.$refs.idTogg.resetToggle(false);
+            }
+        }
     }
 }
 </script>
 
 <style scoped>
+select,
+option,
+input,
+.heading{
+    color: black;
+}
+.heading {
+    width: 27%;
+    margin: 10px auto 0 auto;
+    padding: 10px;
+}
+.filters{
+    display: flex;
+    justify-content: center;
+    gap: 10%;
+    padding: 10px
+}
 table {
   border-collapse: separate;
   border-spacing: 0 15px;
@@ -447,12 +469,17 @@ th,
 td {
   width: 150px;
   text-align: center;
-  border: 1px solid black;
+  border: 1px solid white;
   padding: 5px;
 }
 .flex-div{
     display: flex;
     justify-content: center;
+}
+.togg-div{
+    display: flex;
+    padding-left: 20px;
+    flex-direction: column;
 }
 .filter-term{
     display: flex;
@@ -462,6 +489,10 @@ td {
     display: flex;
     justify-content: center;
     padding-bottom: 10px;
+}
+label[for="sort"] {
+    margin: 10px;
+    color:black;
 }
 
 </style>

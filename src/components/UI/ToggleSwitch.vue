@@ -1,4 +1,5 @@
 <template>
+    <span>{{descending}}</span>
     <input type="checkbox" :name="cName" :id="cName" true-value="des" false-value="asc" v-model="descending" @change="updateSortFilter($event)">
     <label :for="cName"></label>
 </template>
@@ -20,7 +21,7 @@ export default {
 
     data() {
         return {
-            descending: false
+            descending: "asc"
         }
     },
     computed : {
@@ -37,6 +38,10 @@ export default {
 </script>
     
 <style scoped>
+    span{
+        padding-left: 5px;
+        color: black;
+    }
     input[type="checkbox"] {
         width: 0;
         height: 0;

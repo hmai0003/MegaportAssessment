@@ -1,4 +1,6 @@
 <template>
+<CardComp style=" width: 41%;margin: 0 auto;">
+    <h3 class="heading">Add Baked Goods</h3>
     <form class="input" @submit="onSubmit">
         <label for="Id">Id</label>
         <input id="Id" type="text" v-model="id"/>
@@ -8,15 +10,19 @@
         <input id="name" type="text" v-model="name"/>
         <label for="topping">Topping</label>
         <input id="topping" type="text" v-model="topping"/>
-        <button type="submit">Add Item</button>
+        <ButtonComp type="submit" button-type="success">Submit</ButtonComp>
     </form>
+</CardComp>
 </template>
 
 <script>
-
-
+import ButtonComp from './UI/ButtonComponent.vue'
+import CardComp from './UI/CardComp.vue'
 export default {
+
     components: { 
+        ButtonComp,
+        CardComp
     },
 
     props: {
@@ -52,18 +58,29 @@ export default {
 </script>
 
 <style scoped>
+.heading {
+    color:black;
+    width: 27%;
+    margin: 10px auto 0 auto;
+    padding-top: 10px;
+}
+form {
+    color: black
+}
 .input {
-  margin: 2rem auto;
-  padding: 1rem;
-  width: 90%;
-  max-width: 40rem;
-  text-align: center;
+    margin: 0.5rem auto 2rem auto;
+    padding: 1rem;
+    width: 90%;
+    max-width: 40rem;
+    text-align: center;
+    color: black;
 }
 
 .input label {
   display: -webkit-box;
   font-weight: bold;
   margin-bottom: 0.5rem;
+  color: black
 }
 
 .input input {
@@ -73,6 +90,7 @@ export default {
   border: 1px solid #ccc;
   padding: 0.15rem;
   margin-bottom: 0.5rem;
+  color: black
 }
 
 .input input:focus {
